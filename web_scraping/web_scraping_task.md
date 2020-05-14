@@ -15,7 +15,7 @@ I'd like to cover four basic skills today in the L&D session.
     * I won't cover other multimedia formats such as images, video and audio. For these data, the same idea can be applied.
     * I also won't cover some other common data that are scraped such as webpage metadata and website structures.
     
-2. Basic HTML
+2. Basic HTML (HTML structure, CSS, and xpaths)
 
   * I will only cover basic HTML websites which are constructed simply. The main assumption here is that the web-page isn't dynamically loaded.
   * Some webpages are dynamically loaded and a more complex web-scraping procedure needs to be used. The most common example is when web-pages selectively load data. For example, some pages only load data if it detects a browser instance, others only selectively load sections of the website at once, other webpages are password protected and need logins. These types of webpages will not be covered here and left to another L&D session.
@@ -28,7 +28,7 @@ I would like to note that there are really nice simple programs that allow websc
 
 ## Software and packages
 
-I will be using three main packages in R. RVest (beautifulsoup4), Tidyverse (pandas) and furrr (pool module in the multiprocess package), the Python equivalent packages are in parenthesis.
+I will be using three main packages in R. RVest (beautifulsoup4), Tidyverse (pandas) and furrr (pool module in the multiprocess package), the Python equivalent packages are in parenthesis. If you've written some Python code to complete these excercises, it would be nice of you to share it with me so I can update with some Python examples.
 
 ## Excercises
 
@@ -37,6 +37,10 @@ I will be using three main packages in R. RVest (beautifulsoup4), Tidyverse (pan
 2.
 
 3.
+
+4.
+
+## Questions and tips
 
 
 
