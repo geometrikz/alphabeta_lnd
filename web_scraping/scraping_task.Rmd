@@ -1,0 +1,171 @@
+---
+title: "Introduction to web scraping"
+author: "Geoffrey Liu"
+date: "15/05/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rvest)
+library(tidyverse)
+```
+
+# Summary of web-scraping functions
+
+There are only a few elements to webscraping. The process I usually adopt is,
+
+1. Read the webpage into the program you're using for scraping
+2. Create a list of pages that you want to scrape
+3. Decide on the items you want to scrape
+4. Look for common patterns on where these items are located on each page
+5. Repeat for every page.
+
+The order of these steps can sometimes change depending on the task at hand, for example if you're writing a function that crawls through webpages to find items to scrape then step 2 will be near the end.
+
+## Common functions used to web scrape
+
+### Reading in html files
+The most used function is ``read_html()`` in the ``xml2`` library and ``download.file`` in base R. The ``tryCatch`` and ``paste0`` function can be useful as well.
+
+```{r read_html}
+macbookpro16 = read_html("https://www.apple.com/au/macbook-pro-16/")
+macbookpro16
+
+```
+
+```{r eval = FALSE}
+download.file("https://www.apple.com/au/macbook-pro-16/", 
+              "random_macbook_file.html")
+```
+
+```{r read_html with tryCatch}
+url = paste0("https://www.apple.com/au/macbook-pro-", "14")
+macbookpro16 = tryCatch(read_html(url), 
+                        error = function(e){return("Something bad happened but we don't know what")})
+macbookpro16
+```
+
+Note: we can be more specific as to the error. e.g. if it's a page not found error vs a connection error because sometimes your internet breaks down during scraping tasks :(
+
+### HTML datatypes
+
+The second most used function is probably ``html_node``. Before we learn this we need to understand HTML elements. 
+
+**Tags**
+
+HTML Tags: Tags are the starting and ending parts of an HTML element. They begin with < symbol and end with > symbol. Whatever written inside < and > are called tags.
+
+Example: ``<b> </b>``
+
+**Elements**
+
+HTML elements: Elements enclose the contents in between the tags. They consist of some kind of structure or expression. It generally consists of a start tag, content and an end tag.
+
+Example: ``<b>This is the content.</b>``
+
+**Attributes**
+
+ It is used to define the character of an HTML element. It always placed in the opening tag of an element. It generally provides additional styling (attribute) to the element.
+ 
+Example: ``<p align="center">This is paragraph.</p>``
+
+**_Excercise_**: Go to any HTML page and look at the source code (in most browsers you can press ``F12``)
+
+### Finding HTML datatypes
+
+In ``rvest`` there are two different types of ways we can select HTML features, we can use a CSS selector or we can use XPaths. When using CSS selectors, a useful tool is https://selectorgadget.com/. In basic terms, CSS selectors is the high level (quick and easy) way of selecting HTML features and XPaths can be made more detailed.
+
+**_Exercise_**: Go to any page and use the selectorgadget to play around with CSS and XPaths.
+
+```{r CSS example}
+
+url = "https://training.gov.au/Training/Details/AHC32419"
+page = read_html(url)
+
+page %>% html_nodes('table') %>% head()
+
+page %>% html_nodes('table') %>% .[[2]] %>% html_table() %>% head()
+
+page %>% html_node(xpath = "//table[@title = 'Table listing Units of Competency']") %>% 
+  html_table() %>% head()
+```
+
+## Exercises
+For the first task, I want to scrape all ``Units of competency`` within a VET Qualification. I want to know their ``Code``, ``Title``, and ``Elective or Core`` status.
+
+```{r echo=FALSE}
+# setwd("~/lnd/web_scraping/")
+if (file.exists("solutions/scraping_functions.R")) {
+  source("solutions/scraping_functions.R")
+  }
+```
+
+```{r Task 1}
+# Task 1: Scraping tables
+
+page_1 = "https://training.gov.au/Training/Details/AHC32419"
+page_2 = "https://training.gov.au/Training/Details/RTE31303"
+```
+
+```{r Example output: Task 1}
+# Example output for Task 1
+get_program_units("AHC32419") %>% head()
+# get_program_units("RTE31303") %>% head()
+``` 
+
+
+For the second task, I want to scrape the ``Legal name``, ``Trading name(s)``, ``Status``, ``ABN``, ``ACN``, ``RTO type``, and ``Web address`` of an organisation.
+
+```{r Task 2}
+# Task 2: Scraping free text
+
+page_1 = "https://training.gov.au/Organisation/Details/90304"
+page_2 = "https://training.gov.au/Organisation/Details/70018"
+```
+
+```{r Example output: Task 2}
+# Example output for Task 2
+lookup_abn("90304") 
+# lookup_abn("22606")
+```
+
+
+```{r Task 3}
+# Task 2: Scraping free text
+
+page_1 = "https://training.gov.au/Training/Details/AHCNAR301"
+page_2 = "https://training.gov.au/Training/Details/ACMACR401"
+page_3 = "https://training.gov.au/Training/Details/UTENES401D"
+```
+
+
+```{r Example output: Task 3}
+# Example output for Task 3
+get_curriculum("ACMACR401")$curriculum %>% head() %>% select(elements)
+# get_curriculum("UTENES401D")$curriculum %>% head()
+```
+
+
+## Speeding up web scraping tasks
+
+```{r speed comparison}
+subjects = read_csv("~/lnd/web_scraping/data/subjects.csv")$subjects
+
+library(furrr)
+plan(multiprocess)
+
+loop_timer = function(i){
+  scraped_data_loop <- vector("list", length = i)
+  for(i in 1:20){
+    scraped_data_loop[[i]] <- get_curriculum(subjects[i])
+  }
+}
+
+print("6 core parallel functional")
+system.time(scraped_data <- future_map(subjects[1:20], get_curriculum))
+print("single core functional")
+system.time(scraped_data_single_core <- purrr::map(subjects[1:20], get_curriculum))
+print("single core loop")
+system.time(loop_timer(20))
+```
