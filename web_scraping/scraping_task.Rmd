@@ -4,7 +4,13 @@ author: "Geoffrey Liu"
 date: "15/05/2020"
 output: html_document
 ---
-
+<style type="text/css">
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(rvest)
@@ -21,7 +27,9 @@ There are only a few elements to webscraping. The process I usually adopt is,
 4. Look for common patterns on where these items are located on each page
 5. Repeat for every page.
 
+
 The order of these steps can sometimes change depending on the task at hand, for example if you're writing a function that crawls through webpages to find items to scrape then step 2 will be near the end.
+
 
 ## Common functions used to web scrape
 
@@ -87,8 +95,10 @@ page %>% html_nodes('table') %>% head()
 
 page %>% html_nodes('table') %>% .[[2]] %>% html_table() %>% head()
 
-page %>% html_node(xpath = "//table[@title = 'Table listing Units of Competency']") %>% 
-  html_table() %>% head()
+example_table = page %>% html_node(xpath = "//table[@title = 'Table listing Units of Competency']") %>% 
+  html_table()
+colnames(example_table) = c('units', 'title', 'requirement')
+example_table %>% as_tibble() %>% head()
 ```
 
 ## Exercises

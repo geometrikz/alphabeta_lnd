@@ -382,6 +382,13 @@ summary {
 </div>
 
 
+<style type="text/css">
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
 <div id="summary-of-web-scraping-functions" class="section level1">
 <h1>Summary of web-scraping functions</h1>
 <p>There are only a few elements to webscraping. The process I usually adopt is,</p>
@@ -445,29 +452,19 @@ page %&gt;% html_nodes(&#39;table&#39;) %&gt;% head()</code></pre>
 <pre class="r"><code>page %&gt;% html_nodes(&#39;table&#39;) %&gt;% .[[2]] %&gt;% html_table() %&gt;% head()</code></pre>
 <pre><code>##               Release Release date
 ## 1 1 1  (this release)  21/Oct/2019</code></pre>
-<pre class="r"><code>page %&gt;% html_node(xpath = &quot;//table[@title = &#39;Table listing Units of Competency&#39;]&quot;) %&gt;% 
-  html_table() %&gt;% head()</code></pre>
-<pre><code>##   CodeSort Table listing Units of Competency by the Code column
-## 1                AHCCHM101 - Follow basic chemical safety rules
-## 2                 AHCCHM201 - Apply chemicals under supervision
-## 3                     AHCCHM304 - Transport and store chemicals
-## 4                          AHCDRG305 - Install drainage systems
-## 5               AHCDRG306 - Measure drainage system performance
-## 6                     AHCDRG307 - Troubleshoot drainage systems
-##   TitleSort Table listing Units of Competency by the Title column
-## 1                              Follow basic chemical safety rules
-## 2                               Apply chemicals under supervision
-## 3                                   Transport and store chemicals
-## 4                                        Install drainage systems
-## 5                             Measure drainage system performance
-## 6                                   Troubleshoot drainage systems
-##   EssentialSort Table listing Units of Competency by the Essential columnModify filter options of the &#39;Essential&#39; column in Table listing Units of Competency
-## 1                                                                                                                                                    Elective
-## 2                                                                                                                                                    Elective
-## 3                                                                                                                                                    Elective
-## 4                                                                                                                                                    Elective
-## 5                                                                                                                                                    Elective
-## 6                                                                                                                                                    Elective</code></pre>
+<pre class="r"><code>example_table = page %&gt;% html_node(xpath = &quot;//table[@title = &#39;Table listing Units of Competency&#39;]&quot;) %&gt;% 
+  html_table()
+colnames(example_table) = c(&#39;units&#39;, &#39;title&#39;, &#39;requirement&#39;)
+example_table %&gt;% as_tibble() %&gt;% head()</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   units                                  title                       requirement
+##   &lt;chr&gt;                                  &lt;chr&gt;                       &lt;chr&gt;      
+## 1 AHCCHM101 - Follow basic chemical saf… Follow basic chemical safe… Elective   
+## 2 AHCCHM201 - Apply chemicals under sup… Apply chemicals under supe… Elective   
+## 3 AHCCHM304 - Transport and store chemi… Transport and store chemic… Elective   
+## 4 AHCDRG305 - Install drainage systems   Install drainage systems    Elective   
+## 5 AHCDRG306 - Measure drainage system p… Measure drainage system pe… Elective   
+## 6 AHCDRG307 - Troubleshoot drainage sys… Troubleshoot drainage syst… Elective</code></pre>
 </div>
 </div>
 <div id="exercises" class="section level2">
@@ -559,17 +556,17 @@ print(&quot;6 core parallel functional&quot;)</code></pre>
 <pre><code>## [1] &quot;6 core parallel functional&quot;</code></pre>
 <pre class="r"><code>system.time(scraped_data &lt;- future_map(subjects[1:20], get_curriculum))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.146   0.010   6.927</code></pre>
+##   0.131   0.004   5.641</code></pre>
 <pre class="r"><code>print(&quot;single core functional&quot;)</code></pre>
 <pre><code>## [1] &quot;single core functional&quot;</code></pre>
 <pre class="r"><code>system.time(scraped_data_single_core &lt;- purrr::map(subjects[1:20], get_curriculum))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.244   0.010  25.733</code></pre>
+##   0.290   0.023  32.410</code></pre>
 <pre class="r"><code>print(&quot;single core loop&quot;)</code></pre>
 <pre><code>## [1] &quot;single core loop&quot;</code></pre>
 <pre class="r"><code>system.time(loop_timer(20))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.232   0.020  26.794</code></pre>
+##   0.262   0.000  27.107</code></pre>
 </div>
 </div>
 
